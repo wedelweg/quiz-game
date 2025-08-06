@@ -45,7 +45,7 @@ const GameBoard = ({topics, onQuestionClick}: Props) => {
                             </button>
                         )}
                     </div>
-                )};
+                )}
             </div>
         </div>
     );
