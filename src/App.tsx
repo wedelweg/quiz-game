@@ -1,20 +1,32 @@
-import './App.css'
-import GameBoard from "./components/GameBoard.tsx";
-import {topics} from "./data/questions.ts";
-import QuestionModal from "./components/QuestionModal.tsx";
+import './App.css';
 import {useState} from "react";
-
+import {UserNameContext} from "./utils/context.ts";
+import {Route, Routes} from "react-router";
+import Game from "./components/Game.tsx";
+import Login from "./components/Login.tsx";
+import {ScoreProvider} from "./utils/ScoreContext.tsx";
 
 const App = () => {
-     const [selected, setSelected] = useState<{title:string, price:number, question:string, answer:string}|null>(null);
+    const [userName, setUserName] = useState('');
 
     return (
-        <>
-            {!selected && <GameBoard topics={topics} onQuestionClick={setSelected} />}
-            {selected && <QuestionModal title={selected.title} price={selected.price}
-                                        question={selected.question} answer={selected.answer}/>}
-        </>
+        <div className="min-h-screen bg-gradient-to-b from-[#1a1a4f] to-[#000032]
+            text-white p-4 flex flex-col items-center gap-6">
+            <UserNameContext value={{ userName, setUserName }}>
+                <ScoreProvider>
+                    <Routes>
+                        <Route path="/game" element={<Game />} />
+                        <Route path="/" element={<Login />} />
+                    </Routes>
+                </ScoreProvider>
+            </UserNameContext>
+
+        </div>
     );
 };
 
 export default App;
+
+
+
+
