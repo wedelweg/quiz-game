@@ -1,5 +1,5 @@
 import {useContext} from "react";
-import {ScoreContext} from "./ScoreContext.tsx";
+import {ScoreContext} from "../components/ScoreContext.tsx";
 
 export const useScore = () => {
     const context = useContext(ScoreContext);

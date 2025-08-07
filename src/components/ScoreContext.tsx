@@ -1,5 +1,6 @@
-import { createContext, useContext, useState } from "react";
-import type {ReactNode} from "react";
+import { createContext, useState } from "react";
+import type { ReactNode } from "react";
+
 interface ScoreContextType {
     score: number;
     increaseScore: (amount: number) => void;
@@ -8,22 +9,11 @@ interface ScoreContextType {
 
 export const ScoreContext = createContext<ScoreContextType | undefined>(undefined);
 
-export const useScore = () => {
-    const context = useContext(ScoreContext);
-    if (!context) {
-        throw new Error("useScore must be used within a ScoreProvider");
-    }
-    return context;
-};
-
-
-
 export const ScoreProvider = ({ children }: { children: ReactNode }) => {
     const [score, setScore] = useState(0);
 
-    const increaseScore = (amount: number) => setScore(prev => prev + amount);
-    const decreaseScore = (amount: number) =>
-        setScore(prev => Math.max(0, prev - amount));
+    const increaseScore = (amount: number) => setScore((prev) => prev + amount);
+    const decreaseScore = (amount: number) => setScore((prev) => Math.max(0, prev - amount));
 
     return (
         <ScoreContext.Provider value={{ score, increaseScore, decreaseScore }}>

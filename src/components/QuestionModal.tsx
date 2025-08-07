@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {useScore} from "../utils/ScoreContext.tsx";
+import {useScore} from "../utils/useScore.ts";
 
 interface Props {
     title: string,

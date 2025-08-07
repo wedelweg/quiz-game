@@ -1,4 +1,4 @@
-import { useScore } from "../utils/ScoreContext.tsx"
+import { useScore } from "../utils/useScore.ts"
 
 const ScoreData = () => {
     const { score } = useScore();

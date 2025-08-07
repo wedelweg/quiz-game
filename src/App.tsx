@@ -4,7 +4,7 @@ import {UserNameContext} from "./utils/context.ts";
 import {Route, Routes} from "react-router";
 import Game from "./components/Game.tsx";
 import Login from "./components/Login.tsx";
-import {ScoreProvider} from "./utils/ScoreContext.tsx";
+import {ScoreProvider} from "./components/ScoreContext.tsx";
 
 const App = () => {
     const [userName, setUserName] = useState('');
