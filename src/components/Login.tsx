@@ -1,14 +1,14 @@
-import {useContext, useRef} from "react";
-import {UserNameContext} from "../utils/context.ts";
+import {useRef} from "react";
 import {NavLink} from "react-router";
+import {useDispatch} from "react-redux";
+import {changeLogin} from "../actions/userAction.ts";
 
 const Login = () => {
-
-    const {setUserName} = useContext(UserNameContext);
+const dispatch = useDispatch();
     const userName = useRef<HTMLInputElement>(null);
 
     function handleSetNickName() {
-        setUserName(userName.current!.value);
+        dispatch(changeLogin(userName.current!.value||"Guest"));
     }
 
     return (
