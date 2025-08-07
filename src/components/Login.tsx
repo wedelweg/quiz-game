@@ -1,25 +1,28 @@
-import {useContext, useRef} from "react";
-import {UserNameContext} from "../utils/context.ts";
+import {useRef} from "react";
 import {NavLink} from "react-router";
+import {useDispatch} from "react-redux";
+import {changeLogin} from "../actions/userAction.ts";
 
 const Login = () => {
 
-    const {setUserName} = useContext(UserNameContext);
+    const dispatch = useDispatch();
     const userName = useRef<HTMLInputElement>(null);
 
     function handleSetNickName() {
-        setUserName(userName.current!.value);
+        dispatch(changeLogin(userName.current!.value || "Guest"));
     }
 
     return (
         <div className="min-h-screen p-4 flex flex-col gap-6">
             <label>Login
-                <input className={"p-4 border-custom w-32 text-center transition-transform duration-300 active:scale-95"}
-                type={"text"} ref={userName}></input>
+                <input
+                    className={"p-4 border-custom w-32 text-center transition-transform duration-300 active:scale-95"}
+                    type={"text"} ref={userName}></input>
             </label>
             <label>Password
-                <input className={"p-4 border-custom w-32 text-center transition-transform duration-300 active:scale-95"}
-                type={"text"}></input>
+                <input
+                    className={"p-4 border-custom w-32 text-center transition-transform duration-300 active:scale-95"}
+                    type={"text"}></input>
             </label>
             <NavLink to={"/game"}>
                 <button className="btn-yellow"
