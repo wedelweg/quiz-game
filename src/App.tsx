@@ -20,13 +20,8 @@ const App = () => {
                     </Routes>
                 </ScoreProvider>
             </UserNameContext>
-
         </div>
     );
 };
 
 export default App;
-
-
-
-

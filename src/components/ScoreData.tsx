@@ -11,18 +11,3 @@ const ScoreData = () => {
 };
 
 export default ScoreData;
-//
-// import { useScore } from "../utils/ScoreContext.tsx";
-//
-// export const ScoreData = () => {
-//     const { score } = useScore();
-//
-//     return (
-//         <div className="userData p-4 border-custom relative top-0">
-//             <div>Score: </div>
-//             <p className="flex justify-between">{score}</p>
-//         </div>
-//     );
-// };
-//
-
