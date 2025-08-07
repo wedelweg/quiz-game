@@ -5,8 +5,7 @@ const ScoreData = () => {
 
     return (
         <div className="userData p-4 border-custom relative top-0 text-yellow-400 text-right">
-            <div className="text-2xl">Score:</div>
-            <div className="text-lg font-bold flex justify-between">{score}</div>
+            <div className="text-2xl font-bold">Score: {score}</div>
         </div>
     );
 };
