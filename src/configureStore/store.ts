@@ -1,6 +1,7 @@
-import {legacy_createStore as createStore, type Store} from "redux";
+import {applyMiddleware, legacy_createStore as createStore} from "redux";
 import {userReducer} from "../reducers/userReducer.ts";
 import type {StateInterface} from "../utils/types.ts";
+import {firestoreMiddleware} from "../middleware/firestoreMiddleware.ts";
 
 export const initialState: StateInterface = {
      user:{
@@ -12,4 +13,5 @@ export const initialState: StateInterface = {
      }
  };
 
-export const store:Store<StateInterface> = createStore(userReducer, initialState);
+export const store = createStore(userReducer, initialState,
+    applyMiddleware(firestoreMiddleware));
