@@ -1,19 +1,32 @@
-import './App.css'
-import GameBoard from "./components/GameBoard.tsx";
-import {topics} from "./data/questions.ts";
-import QuestionModal from "./components/QuestionModal.tsx";
-import {useState} from "react";
-
+import {Route, Routes} from "react-router";
+import Game from "./components/Game.tsx";
+import Login from "./components/Login.tsx";
+import {collection, getDocs} from "firebase/firestore";
+import {db} from "./data/firestore.ts";
+import {useEffect} from "react";
 
 const App = () => {
-     const [selected, setSelected] = useState<{title:string, price:number, question:string, answer:string}|null>(null);
+
+    useEffect(() => {
+        getDocs(collection(db, "users"))
+            .then(querySnapshot => {
+                querySnapshot.forEach((doc) => {
+                    console.log(`${doc.id} => ${JSON.stringify(doc.data())}`);
+                });
+            })
+            .catch((error) => {
+                console.error("Error fetching users from Firestore:", error);
+            });
+    }, []);
 
     return (
-        <>
-            {!selected && <GameBoard topics={topics} onQuestionClick={setSelected} />}
-            {selected && <QuestionModal title={selected.title} price={selected.price}
-                                        question={selected.question} answer={selected.answer}/>}
-        </>
+        <div className="min-h-screen bg-gradient-to-b from-[#1a1a4f] to-[#000032]
+            text-white p-4 flex flex-col items-center gap-6">
+                    <Routes>
+                        <Route path="/game" element={<Game/>}/>
+                        <Route path="/" element={<Login/>}/>
+                    </Routes>
+        </div>
     );
 };
 
