@@ -1,8 +1,6 @@
 import {useState} from "react";
 import {useAppDispatch, useAppSelector} from "../app/hooks.ts";
-import {decreaseScore, increaseScore} from "../features/scoreData/scoreSlice.ts";
-import {updateDoc,doc} from "firebase/firestore";
-import {db} from "../data/firestore.ts";
+import {fetchScoreUpdateDB} from "../features/scoreData/scoreSlice.ts";
 
 
 interface Props {
@@ -19,22 +17,9 @@ const QuestionModal = ({title, price, question, answer, onClose}: Props) => {
     const id = useAppSelector(state => state.userLayer.id);
     const oldScore = useAppSelector(state => state.score.scores.score)
 
-    function increase(price: number) {
-        dispatch(increaseScore(price));
-    }
 
-    function decrease(price: number) {
-        dispatch(decreaseScore(price));
-    }
-
-    async function increaseScoreInDB() {
-        const userRef = doc(db, 'users', id)
-        await updateDoc(userRef, {score: oldScore + price})
-    }
-
-    async function decreaseScoreInDB() {
-        const userRef = doc(db, 'users', id)
-        await updateDoc(userRef, {score: oldScore - price})
+    function changeScore(price: number) {
+        dispatch(fetchScoreUpdateDB({price, oldScore, id}));
     }
 
     return (
@@ -55,15 +40,13 @@ const QuestionModal = ({title, price, question, answer, onClose}: Props) => {
                         <div className="flex items-center justify-center w-full">User answered correctly?</div>
                         <button className="btn-yellow"
                                 onClick={() => {
-                                    increaseScoreInDB();
-                                    increase(price);
+                                    changeScore(price)
                                     onClose()
                                 }}> YES
                         </button>
                         <button className="btn-yellow"
                                 onClick={() => {
-                                    decreaseScoreInDB()
-                                    decrease(price)
+                                    changeScore(-price)
                                     onClose();
                                 }}> NO
                         </button>
