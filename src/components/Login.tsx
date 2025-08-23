@@ -1,9 +1,7 @@
 import {useRef} from "react";
 import {useNavigate} from "react-router-dom";
-import {addDoc, collection} from "firebase/firestore";
-import {db} from "../data/firestore.ts";
-import {changeId, changeLogin} from "../features/userData/userDataSlice.ts";
 import {useAppDispatch} from "../app/hooks.ts";
+import {fetchUserSaveInDB} from "../features/userData/userDataSlice.ts";
 
 const Login = () => {
 
@@ -12,21 +10,10 @@ const Login = () => {
     const userName = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
 
-    async function handleSubmit() {
+    function handleSubmit() {
         const login = userName.current!.value || "Guest";
         const password = passwordRef.current!.value || "";
-        try {
-            const docRef = await addDoc(collection(db, "users"), {
-                login,
-                password,
-                score: 0,
-                createdAt: Date.now(),
-            });
-            dispatch(changeId(docRef.id));
-        } catch (e) {
-            console.error("Error adding user to Firestore:", e);
-        }
-        dispatch(changeLogin(login));
+        dispatch(fetchUserSaveInDB({login, password}));
         navigate("/game");
     }
 
