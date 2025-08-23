@@ -18,16 +18,16 @@ const Login = () => {
     }
 
     return (
-        <div className="min-h-screen p-4 flex flex-col gap-6">
-            <label>Login
+        <div className="min-h-screen p-4 flex flex-col justify-center text-center gap-7">
+            <label className={'font-bold ms-1'}>Login
                 <input id={"login-input"}
-                       className={"p-4 border-custom w-32 text-center transition-transform duration-300 active:scale-95"}
-                       type={"text"} ref={userName}></input>
+                    className={"p-4 border-custom ml-13 w-45 text-center transition-transform duration-300 active:scale-95"}
+                    type={"text"} ref={userName}></input>
             </label>
-            <label>Password
+            <label className={'font-bold'}>Password
                 <input id={"password-input"}
-                       className={"p-4 border-custom w-32 text-center transition-transform duration-300 active:scale-95"}
-                       type={"password"} ref={passwordRef}></input>
+                    className={"p-4 border-custom ml-6 w-45 text-center transition-transform duration-300 active:scale-95"}
+                    type={"password"} ref={passwordRef}></input>
             </label>
             <button className="btn-yellow" onClick={handleSubmit}>Sign in</button>
         </div>
