@@ -36,6 +36,9 @@ const userDataSlice = createSlice({
     reducers: {
         changeLogin(state, action: PayloadAction<string>) {
             state.user.login = action.payload;
+        },
+        changeId(state, action: PayloadAction<string>) {
+            state.id = action.payload;
         }
     },
     extraReducers: (builder) => {
@@ -56,5 +59,5 @@ const userDataSlice = createSlice({
     }
 })
 
-export const {changeLogin} = userDataSlice.actions;
+export const {changeLogin, changeId} = userDataSlice.actions;
 export default userDataSlice.reducer;

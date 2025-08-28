@@ -1,4 +1,4 @@
-import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
+import {createAsyncThunk, createSlice, type PayloadAction} from "@reduxjs/toolkit";
 import type {ScoreStateInterface} from "../../utils/types.ts";
 import {doc, updateDoc} from "firebase/firestore";
 import {db} from "../../data/firestore.ts";
@@ -32,7 +32,11 @@ export const fetchScoreUpdateDB = createAsyncThunk(
 const scoreSlice = createSlice({
     name: 'score',
     initialState,
-    reducers: {},
+    reducers: {
+        changeScore: (state: ScoreStateInterface, action: PayloadAction<number>) => {
+            state.scores.score = action.payload
+        }
+    },
     extraReducers: (builder) => {
         builder
             .addCase(fetchScoreUpdateDB.pending, (state) => {
@@ -46,5 +50,5 @@ const scoreSlice = createSlice({
             })
     }
 })
-
+export const {changeScore} = scoreSlice.actions;
 export default scoreSlice.reducer;
