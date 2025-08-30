@@ -16,6 +16,9 @@ const UserData = () => {
         navigate("/");
     };
 
+
+    // todo add check: if Guest -> show btn "go to login page" AND if real user -> show logout btn
+
     return (
         <div className="flex items-center gap-4 text-yellow-400 text-right">
             <div>

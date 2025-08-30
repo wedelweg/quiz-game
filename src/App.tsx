@@ -7,6 +7,7 @@ import {useEffect} from "react";
 import {useAppDispatch} from "./app/hooks.ts";
 import {changeScore} from "./features/scoreData/scoreSlice.ts";
 import {changeId, changeLogin} from "./features/userData/userDataSlice.ts";
+import Registration from "./components/Registration.tsx";
 
 const App = () => {
 
@@ -37,6 +38,7 @@ const App = () => {
             text-white p-4 flex flex-col items-center gap-6">
                     <Routes>
                         <Route path="/game" element={<Game/>}/>
+                        <Route path="/register" element={<Registration/>}/>
                         <Route path="/" element={<Login/>}/>
                     </Routes>
         </div>
