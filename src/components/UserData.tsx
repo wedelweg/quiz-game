@@ -1,6 +1,6 @@
 import {useNavigate} from "react-router-dom";
 import {useAppDispatch, useAppSelector} from "../app/hooks.ts";
-import {changeLogin} from "../features/userData/userDataSlice.ts";
+import {logOutAction} from "../app/store.ts";
 
 const UserData = () => {
     const userName = useAppSelector(state => state.userLayer.user.login);
@@ -8,9 +8,16 @@ const UserData = () => {
     const dispatch = useAppDispatch();
 
     const logout = () => {
-        dispatch(changeLogin(""));
+        localStorage.removeItem("userId");
+        // dispatch(changeLogin(""));
+        // dispatch(changeId(""));
+        // dispatch(changeScore(0));
+        dispatch(logOutAction())
         navigate("/");
     };
+
+
+    // todo add check: if Guest -> show btn "go to login page" AND if real user -> show logout btn
 
     return (
         <div className="flex items-center gap-4 text-yellow-400 text-right">
