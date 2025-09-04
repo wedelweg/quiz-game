@@ -1,13 +1,4 @@
-export interface Question {
-    price: number;
-    question: string;
-    answer: string;
-}
-
-export interface Topic {
-    title: string;
-    questions: Question[];
-}
+import type { Topic } from "../utils/types";
 
 export const topics: Topic[] = [
     {

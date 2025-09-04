@@ -1,4 +1,4 @@
-import type {Topic} from "../data/questions.ts";
+import type {Topic} from "../utils/types";
 import * as React from "react";
 
 

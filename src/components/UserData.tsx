@@ -1,14 +1,19 @@
 import {useNavigate} from "react-router-dom";
 import {useAppDispatch, useAppSelector} from "../app/hooks.ts";
-import {changeLogin} from "../features/userData/userDataSlice.ts";
+import {logoutAction} from "../app/store.ts";
 
 const UserData = () => {
     const userName = useAppSelector(state => state.userLayer.user.login);
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
 
+    // rootDispatch ->
     const logout = () => {
-        dispatch(changeLogin(""));
+        localStorage.removeItem("userId");
+        // dispatch(changeLogin(""));
+        // dispatch(changeId(""));
+        // dispatch(changeScore(0));
+        dispatch(logoutAction());
         navigate("/");
     };
 

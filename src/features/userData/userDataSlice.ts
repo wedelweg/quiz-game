@@ -13,18 +13,18 @@ const initialState: UserStateInterface = {
 
 export const fetchUserSaveInDB = createAsyncThunk(
     "user/fetchUserSaveInDB",
-    async ({login,password}:UserInfo)=>{
+    async ({login, password}: UserInfo) => {
         const response = await addDoc(collection(db, "users"), {
             login,
             password,
             score: 0,
             createdAt: Date.now(),
         });
-        if(!response){
+        if (!response) {
             throw new Error("Error adding user to Firestore");
         }
         return {
-            id:response.id,
+            id: response.id,
             login,
         };
     }
@@ -36,25 +36,28 @@ const userDataSlice = createSlice({
     reducers: {
         changeLogin(state, action: PayloadAction<string>) {
             state.user.login = action.payload;
-        }
+        },
+        changeId(state, action: PayloadAction<string>) {
+            state.id = action.payload;
+        },
     },
-    extraReducers:(builder)=> {
+    extraReducers: (builder) => {
         builder
-            .addCase(fetchUserSaveInDB.pending, (state)=>{
+            .addCase(fetchUserSaveInDB.pending, (state) => {
                 state.id = "Pending....";
                 console.log("Pending...")
             })
-            .addCase(fetchUserSaveInDB.fulfilled, (state, action)=>{
+            .addCase(fetchUserSaveInDB.fulfilled, (state, action) => {
                 state.id = action.payload.id;
                 state.user.login = action.payload.login;
                 localStorage.setItem("userId", action.payload.id)
             })
-            .addCase(fetchUserSaveInDB.rejected, (state,action)=>{
+            .addCase(fetchUserSaveInDB.rejected, (state, action) => {
                 state.id = action.payload + "" || "Error!!!";
                 console.log(action.payload);
             })
     }
 })
 
-export const {changeLogin} = userDataSlice.actions;
+export const {changeLogin, changeId} = userDataSlice.actions;
 export default userDataSlice.reducer;

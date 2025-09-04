@@ -4,28 +4,47 @@ import Login from "./components/Login.tsx";
 import {collection, getDocs} from "firebase/firestore";
 import {db} from "./data/firestore.ts";
 import {useEffect} from "react";
+import {useAppDispatch} from "./app/hooks.ts";
+import {changeScore} from "./features/scoreData/scoreSlice.ts";
+import {changeId, changeLogin} from "./features/userData/userDataSlice.ts";
+import {runTopicsMigration} from "./data/migrate.ts";
 
 const App = () => {
 
+    const dispatch = useAppDispatch();
+
     useEffect(() => {
-        getDocs(collection(db, "users"))
-            .then(querySnapshot => {
-                querySnapshot.forEach((doc) => {
-                    console.log(`${doc.id} => ${JSON.stringify(doc.data())}`);
+        // Миграция топиков при первом старте
+        runTopicsMigration();
+
+        const userId = localStorage.getItem("userId");
+        console.log(userId)
+        if (userId) {
+            getDocs(collection(db, "users"))
+                .then(querySnapshot => {
+                    querySnapshot.forEach((doc) => {
+                        if (doc.id === userId) {
+                            const user = doc.data();
+                            console.log(`${userId} => ${JSON.stringify(user)}`);
+                            dispatch(changeScore(user.score));
+                            dispatch(changeLogin(user.login))
+                            dispatch(changeId(userId));
+                        }
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error fetching users from Firestore:", error);
                 });
-            })
-            .catch((error) => {
-                console.error("Error fetching users from Firestore:", error);
-            });
+        }
     }, []);
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-[#1a1a4f] to-[#000032]
             text-white p-4 flex flex-col items-center gap-6">
-                    <Routes>
-                        <Route path="/game" element={<Game/>}/>
-                        <Route path="/" element={<Login/>}/>
-                    </Routes>
+            <Routes>
+                <Route path="/game" element={<Game/>}/>
+                <Route path="/" element={<Login/>}/>
+            </Routes>
         </div>
     );
 };

@@ -1,8 +1,10 @@
 import {useState} from 'react';
 import GameBoard from "./GameBoard.tsx";
-import {topics} from "../data/questions.ts";
 import QuestionModal from "./QuestionModal.tsx";
 import PageHeader from "./PageHeader.tsx";
+import {useEffect} from "react";
+import {useAppDispatch, useAppSelector} from "../app/hooks.ts";
+import {fetchTopics, seedTopics} from "../features/topics/topicsSlice.ts";
 
 const Game = () => {
 
@@ -16,6 +18,18 @@ const Game = () => {
     const handleCloseModal = () => {
         setSelected(null);
     };
+
+    const dispatch = useAppDispatch();
+    const topics = useAppSelector(state => state.topics.topics);
+
+    useEffect(() => {
+        // Загружаем топики; если пусто — сначала сеедим, потом перезагружаем
+        dispatch(fetchTopics()).then((action: any) => {
+            if (Array.isArray(action.payload) && action.payload.length === 0) {
+                dispatch(seedTopics()).then(() => dispatch(fetchTopics()));
+            }
+        });
+    }, [dispatch]);
 
     return (
         <div className="w-full">
