@@ -1,6 +1,7 @@
 import {combineReducers, configureStore, type UnknownAction} from "@reduxjs/toolkit";
 import userDataSlice from "../features/userData/userDataSlice.ts";
 import scoreSlice from "../features/scoreData/scoreSlice.ts";
+import topicsReducer from "../features/topics/topicsSlice.ts";
 //todo to configure with redux-persist
 
 export const logOutAction = () => ({type:'LOGOUT'})
@@ -8,6 +9,7 @@ export const logOutAction = () => ({type:'LOGOUT'})
 const appReducer = combineReducers({
     userLayer: userDataSlice,
     score: scoreSlice,
+    topics: topicsReducer,
 })
 
 // 1. Получаем тип стейта корневого редюсера
@@ -23,6 +25,7 @@ const logOutReducer = (state: AppState | undefined, action: UnknownAction): AppS
 
 export const store = configureStore({
     reducer: logOutReducer,
+
 });
 
 

@@ -1,6 +1,7 @@
 import {useState} from "react";
-import {useAppDispatch, useAppSelector} from "../app/hooks.ts";
-import {fetchScoreUpdateDB} from "../features/scoreData/scoreSlice.ts";
+import { useAppSelector} from "../app/hooks.ts";
+import {updateDoc,doc} from "firebase/firestore";
+import {db} from "../data/firestore.ts";
 
 
 interface Props {
@@ -13,13 +14,16 @@ interface Props {
 
 const QuestionModal = ({title, price, question, answer, onClose}: Props) => {
     const [showAnswer, setShowAnswer] = useState(false);
-    const dispatch = useAppDispatch();
     const id = useAppSelector(state => state.userLayer.id);
     const oldScore = useAppSelector(state => state.score.scores.score)
+    async function increaseScoreInDB() {
+        const userRef = doc(db, 'users', id)
+        await updateDoc(userRef, {score: oldScore + price})
+    }
 
-
-    function changeScore(price: number) {
-        dispatch(fetchScoreUpdateDB({price, oldScore, id}));
+    async function decreaseScoreInDB() {
+        const userRef = doc(db, 'users', id)
+        await updateDoc(userRef, {score: oldScore - price})
     }
 
     return (
@@ -40,13 +44,13 @@ const QuestionModal = ({title, price, question, answer, onClose}: Props) => {
                         <div className="flex items-center justify-center w-full">User answered correctly?</div>
                         <button className="btn-yellow"
                                 onClick={() => {
-                                    changeScore(price)
+                                    increaseScoreInDB();
                                     onClose()
                                 }}> YES
                         </button>
                         <button className="btn-yellow"
                                 onClick={() => {
-                                    changeScore(-price)
+                                    decreaseScoreInDB()
                                     onClose();
                                 }}> NO
                         </button>

@@ -13,3 +13,14 @@ export interface ScoreStateInterface {
         score: number
     }
 }
+
+export interface Question {
+    price: number;
+    question: string;
+    answer: string;
+}
+
+export interface Topic {
+    title: string;
+    questions: Question[];
+}
