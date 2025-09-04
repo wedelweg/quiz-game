@@ -40,6 +40,7 @@ const App = () => {
                         <Route path="/game" element={<Game/>}/>
                         <Route path="/register" element={<Registration/>}/>
                         <Route path="/" element={<Login/>}/>
+                        <Route path="/login" element={<Login />} />
                     </Routes>
         </div>
     );

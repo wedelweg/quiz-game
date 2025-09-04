@@ -4,6 +4,8 @@ import {useAppDispatch} from "../app/hooks.ts";
 import {fetchUserCheckExistInDB} from "../features/userData/userDataSlice.ts";
 import {NavLink} from "react-router";
 
+
+
 const Login = () => {
 
     const dispatch = useAppDispatch();
@@ -12,10 +14,13 @@ const Login = () => {
     const passwordRef = useRef<HTMLInputElement>(null);
 
     function handleSubmitSignIn() {
+
         const login = userNameRef.current!.value;
         const password = passwordRef.current!.value;
         if (login && password) {
             dispatch(fetchUserCheckExistInDB({login, password}));
+            // todo ... dispatch(changeScore(fetchedUser.score))
+            // todo ... dispatch(fetchScoreFromDB(userId))
             navigate("/game");
         } else {
             alert("Please fill in all fields");

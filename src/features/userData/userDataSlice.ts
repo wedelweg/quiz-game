@@ -46,7 +46,8 @@ export const fetchUserCheckExistInDB = createAsyncThunk(
         const userDoc = querySnapshot.docs[0];
         return {
             id: userDoc.id,
-            login: userDoc.data().login
+            login: userDoc.data().login,
+            score: userDoc.data().score // added
         }
     }
 );
@@ -87,10 +88,12 @@ const userDataSlice = createSlice({
                 state.id = action.payload.id;
                 state.user.login = action.payload.login;
                 localStorage.setItem("userId", action.payload.id)
+                // dispatch(changeScore(action.payload.score));
+                // dispatch(fetchScoreFromDB(action.payload.id)); //if not here, then in login.
                 console.log("Check Fulfilled...")
             })
             .addCase(fetchUserCheckExistInDB.rejected, () => {
-                console.log("Check Rejected... Attention: Now system thinks it's a guest!") //todo need fix: reject sign in as a Guest if credentials are incorrect
+                console.log('Authentication failed. User remains unauthorized.'); //fixed
             })
     }
 })
