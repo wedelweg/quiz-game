@@ -17,7 +17,7 @@ interface ScoreWithId {
 
 export const fetchScoreUpdateDB = createAsyncThunk(
     "user/fetchScoreUpdateDB",
-    async ({price, oldScore, id}: ScoreWithId) => {
+    async ({price, id}: ScoreWithId) => {
         const userRef = doc(db, 'users', id);
         const newScore = await runTransaction(db, async (transaction) => {
             const snapshot = await transaction.get(userRef);
