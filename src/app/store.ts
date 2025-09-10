@@ -15,7 +15,6 @@ const appReducer = combineReducers({
     answers: answersReducer,
 })
 
-// Корневой редюсер с очисткой состояния при LOGOUT
 const rootReducer = (state: ReturnType<typeof appReducer> | undefined, action: UnknownAction) => {
     if (action.type === 'LOGOUT') {
         state = undefined;

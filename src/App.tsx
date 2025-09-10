@@ -1,4 +1,4 @@
-import {Route, Routes} from "react-router";
+import { Route, Routes } from 'react-router-dom'
 import Game from "./components/Game.tsx";
 import Login from "./components/Login.tsx";
 import {doc, getDoc} from "firebase/firestore";

@@ -1,88 +1,121 @@
-import {useState} from "react";
-import {useAppDispatch, useAppSelector} from "../app/hooks.ts";
-import {fetchScoreUpdateDB} from "../features/scoreData/scoreSlice.ts";
-import {markAnswered} from "../features/topics/topicsSlice.ts";
-import {addAnswerToHistory} from "../features/answers/answersSlice.ts";
-
+import { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "../app/hooks.ts";
+import { fetchScoreUpdateDB } from "../features/scoreData/scoreSlice.ts";
+import { markAnswered } from "../features/topics/topicsSlice.ts";
+import { addAnswerToHistory } from "../features/answers/answersSlice.ts";
 
 interface Props {
-    title: string,
-    price: number,
-    question: string,
-    answer: string,
-    onClose: () => void
+    title: string;
+    price: number;
+    question: string;
+    answer: string;
+    onClose: () => void;
 }
 
-const QuestionModal = ({title, price, question, answer, onClose}: Props) => {
+const QuestionModal = ({ title, price, question, answer, onClose }: Props) => {
     const [showAnswer, setShowAnswer] = useState(false);
+    const [busy, setBusy] = useState(false); // защита от двойных кликов
+
     const dispatch = useAppDispatch();
-    const id = useAppSelector(state => state.userLayer.id);
-    const oldScore = useAppSelector(state => state.score.scores.score)
+    const id = useAppSelector((s) => s.userLayer.id);
+    const oldScore = useAppSelector((s) => s.score.scores.score);
 
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === "Escape") onClose();
+        };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, [onClose]);
 
-    function changeScore(price: number) {
+    const onBackdropClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
+        if (e.target === e.currentTarget) onClose();
+    };
+
+    function changeScore(delta: number) {
         if (!id) {
             alert("Сохранение очков доступно только для авторизованных пользователей");
             return;
         }
-        dispatch(fetchScoreUpdateDB({price, oldScore, id}));
+        dispatch(fetchScoreUpdateDB({ price: delta, oldScore, id }));
+    }
+
+    async function handleResult(result: "correct" | "wrong") {
+        if (busy) return;
+        setBusy(true);
+
+        dispatch(markAnswered({ title, price, result }));
+
+        if (id) {
+            dispatch(
+                addAnswerToHistory({
+                    userId: id,
+                    answer: {
+                        title,
+                        price,
+                        question,
+                        result,
+                        answeredAt: Date.now(),
+                    },
+                })
+            );
+        }
+
+        changeScore(result === "correct" ? price : -price);
+
+        setBusy(false);
+        onClose();
     }
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-            <div
-                className="bg-[#1a1a4f] rounded-xl shadow-lg p-8 w-[90%] max-w-xl text-center text-white animate-fade-in-up">
-                <h1 className="text-3xl font-bold mb-2 text-white">{title}</h1>
-                <h2 className="text-xl text-yellow-400 mb-4">{price} scores</h2>
+        <div
+            className="modal-backdrop"
+            onClick={onBackdropClick}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="q-title"
+        >
+            <div className="modal-card animate-fade-in-up">
+                <h1 id="q-title" className="font-display text-3xl mb-2 text-white">
+                    {title}
+                </h1>
+                <h2 className="text-amber-300 mb-4">{price} scores</h2>
+
                 <p className="text-lg mb-6">{question}</p>
+
                 {!showAnswer ? (
-                    <button
-                        onClick={() => setShowAnswer(true)}
-                        className="btn-yellow">
+                    <button onClick={() => setShowAnswer(true)} className="btn-yellow">
                         Show answer
                     </button>
                 ) : (
-                    <div><p className="mt-4 text-xl text-green-300">{answer}</p>
-                        <div className="flex items-center justify-center w-full">User answered correctly?</div>
-                        <button className="btn-yellow"
-                                onClick={() => {
-                                    dispatch(markAnswered({ title, price, result: 'correct' }));
-                                    if (id) {
-                                        dispatch(addAnswerToHistory({ userId: id, answer: {
-                                                title,
-                                                price,
-                                                question,
-                                                result: 'correct',
-                                                answeredAt: Date.now()
-                                            }}));
-                                    }
-                                    changeScore(price)
-                                    onClose()
-                                }}> YES
-                        </button>
-                        <button className="btn-yellow"
-                                onClick={() => {
-                                    dispatch(markAnswered({ title, price, result: 'wrong' }));
-                                    if (id) {
-                                        dispatch(addAnswerToHistory({ userId: id, answer: {
-                                                title,
-                                                price,
-                                                question,
-                                                result: 'wrong',
-                                                answeredAt: Date.now()
-                                            }}));
-                                    }
-                                    changeScore(-price)
-                                    onClose();
-                                }}> NO
-                        </button>
+                    <div className="space-y-5">
+                        <p className="mt-1 text-xl text-green-300">{answer}</p>
+
+                        <div className="flex items-center justify-center w-full opacity-80">
+                            User answered correctly?
+                        </div>
+
+                        <div className="flex justify-center gap-3">
+                            <button
+                                className="btn-yellow disabled:opacity-60"
+                                disabled={busy}
+                                onClick={() => handleResult("correct")}
+                            >
+                                YES
+                            </button>
+                            <button
+                                className="btn-ghost disabled:opacity-60"
+                                disabled={busy}
+                                onClick={() => handleResult("wrong")}
+                            >
+                                NO
+                            </button>
+                        </div>
                     </div>
                 )}
-
             </div>
         </div>
     );
 };
-
 
 export default QuestionModal;

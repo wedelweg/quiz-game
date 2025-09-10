@@ -1,23 +1,20 @@
-import {useRef} from "react";
-import {useNavigate} from "react-router-dom";
-import {useAppDispatch} from "../app/hooks.ts";
-import {fetchUserCheckExistInDB} from "../features/userData/userDataSlice.ts";
-import {NavLink} from "react-router";
-import {changeScore} from "../features/scoreData/scoreSlice.ts";
+import { useRef } from "react";
+import { useNavigate, NavLink } from "react-router-dom";
+import { useAppDispatch } from "../app/hooks.ts";
+import { fetchUserCheckExistInDB } from "../features/userData/userDataSlice.ts";
+import { changeScore } from "../features/scoreData/scoreSlice.ts";
 
-// Register and Login
 const Login = () => {
-
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const userNameRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
 
     function handleSubmitSignIn() {
-        const login = userNameRef.current!.value;
+        const login = userNameRef.current!.value.trim();
         const password = passwordRef.current!.value;
         if (login && password) {
-            dispatch(fetchUserCheckExistInDB({login, password}))
+            dispatch(fetchUserCheckExistInDB({ login, password }))
                 .unwrap()
                 .then((payload) => {
                     if (typeof payload?.score === "number") {
@@ -38,20 +35,46 @@ const Login = () => {
     }
 
     return (
-        <div className="min-h-screen p-4 flex flex-col justify-center text-center gap-7">
-            <label className={'font-bold ms-1'}>Login
-                <input id={"login-input"}
-                       className={"p-4 border-custom ml-13 w-45 text-center transition-transform duration-300 active:scale-95"}
-                       type={"text"} ref={userNameRef}></input>
-            </label>
-            <label className={'font-bold'}>Password
-                <input id={"password-input"}
-                       className={"p-4 border-custom ml-6 w-45 text-center transition-transform duration-300 active:scale-95"}
-                       type={"password"} ref={passwordRef}></input>
-            </label>
-            <button className="btn-yellow" onClick={handleSubmitSignIn}>Sign in</button>
-            <button className="btn-yellow" onClick={handleSubmitGuest}>Sign in as a guest</button>
-            <button className="btn-yellow"><NavLink to={'/register'}>Go to registration</NavLink></button>
+        <div className="game-shell flex flex-col items-center gap-6">
+            <div className="glass p-8 w-full max-w-md">
+                <h2 className="font-display text-2xl mb-6 title-gradient text-center">
+                    Sign in
+                </h2>
+
+                <label className="block mb-4">
+                    <span className="block mb-2 font-semibold">Login</span>
+                    <input
+                        id="login-input"
+                        className="input-glass"
+                        type="text"
+                        ref={userNameRef}
+                        placeholder="Your nickname"
+                    />
+                </label>
+
+                <label className="block mb-6">
+                    <span className="block mb-2 font-semibold">Password</span>
+                    <input
+                        id="password-input"
+                        className="input-glass"
+                        type="password"
+                        ref={passwordRef}
+                        placeholder="••••••••"
+                    />
+                </label>
+
+                <div className="flex flex-col gap-3">
+                    <button className="btn-yellow" onClick={handleSubmitSignIn}>
+                        Sign in
+                    </button>
+                    <button className="btn-ghost" onClick={handleSubmitGuest}>
+                        Sign in as a guest
+                    </button>
+                    <NavLink to="/register" className="btn-ghost text-center">
+                        Go to registration
+                    </NavLink>
+                </div>
+            </div>
         </div>
     );
 };

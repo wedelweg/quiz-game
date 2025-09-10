@@ -1,62 +1,131 @@
-import type {Topic} from "../utils/types";
 import * as React from "react";
-import {useAppSelector} from "../app/hooks.ts";
-
+import type { Topic } from "../utils/types";
+import { useAppSelector } from "../app/hooks.ts";
 
 interface Props {
     topics: Topic[];
-    onQuestionClick: React.Dispatch<React.SetStateAction<{
-        title: string,
-        price: number,
-        question: string,
-        answer: string
-    } | null>>;
+    onQuestionClick: React.Dispatch<
+        React.SetStateAction<
+            | {
+            title: string;
+            price: number;
+            question: string;
+            answer: string;
+        }
+            | null
+        >
+    >;
 }
 
-const GameBoard = ({topics, onQuestionClick}: Props) => {
-    const selectedMap = useAppSelector(s => s.topics.selectedIndexByTitleAndPrice);
-    const answeredMap = useAppSelector(s => s.topics.answeredStatusByTitleAndPrice);
-    return (
-        <div>
+const PRICES = [100, 200, 300, 400, 500];
 
-            <div className="flex flex-col gap-2 w-fit mx-auto">
-
-                {topics.map((topic, i) =>
-                    <div key={i}  className="flex">
-                        <div className="w-32 bg-[#1f1f6b] hover:bg-[#000088] cursor-pointer text-white text-lg font-semibold p-4
-                        border-custom">
-                            {topic.title}
-                        </div>
-
-
-                        {[100,200,300,400,500].map((priceVal) => {
-                            const idx = selectedMap[topic.title]?.[priceVal];
-                            const picked = typeof idx === 'number' ? topic.questions[idx] : undefined;
-                            const status = answeredMap[topic.title]?.[priceVal];
-                            const isAnswered = status === 'correct' || status === 'wrong';
-                            const bg = status === 'correct' ? 'bg-green-700' : status === 'wrong' ? 'bg-red-700' : 'bg-[#000066] hover:bg-[#000088]';
-                            return (
-                                <button key={priceVal}
-                                        onClick={() => picked && onQuestionClick({
-                                            title: topic.title,
-                                            price: priceVal,
-                                            question: picked.question,
-                                            answer: picked.answer
-                                        })}
-                                        disabled={!picked || isAnswered}
-                                        className={`${bg} ${isAnswered ? 'opacity-80 cursor-not-allowed' : 'cursor-pointer'} text-yellow-400 text-xl font-bold
-                                    p-4 border-custom w-32 text-center transition-transform duration-300 active:scale-95`}
-                                >
-                                    {priceVal}
-                                </button>
-                            );
-                        })}
-                    </div>
-                )}
-            </div>
-        </div>
+export default function GameBoard({ topics, onQuestionClick }: Props) {
+    const selectedMap = useAppSelector(
+        (s) => s.topics.selectedIndexByTitleAndPrice
     );
-};
+    const answeredMap = useAppSelector(
+        (s) => s.topics.answeredStatusByTitleAndPrice
+    );
 
+    const getPicked = (topic: Topic, priceVal: number) => {
+        const idx = selectedMap[topic.title]?.[priceVal];
+        return typeof idx === "number" ? topic.questions[idx] : undefined;
+    };
 
-export default GameBoard;
+    const PriceButton: React.FC<{
+        topic: Topic;
+        price: number;
+        compact?: boolean;
+    }> = ({ topic, price, compact }) => {
+        const picked = getPicked(topic, price);
+        const status = answeredMap[topic.title]?.[price];
+        const isAnswered = status === "correct" || status === "wrong";
+        const answeredClass =
+            status === "correct"
+                ? "board-cell--correct"
+                : status === "wrong"
+                    ? "board-cell--wrong"
+                    : "";
+
+        return (
+            <button
+                onClick={() =>
+                    picked &&
+                    onQuestionClick({
+                        title: topic.title,
+                        price,
+                        question: picked.question,
+                        answer: picked.answer,
+                    })
+                }
+                disabled={!picked || isAnswered}
+                className={[
+                    "board-cell",
+                    answeredClass,
+                    isAnswered ? "opacity-90 cursor-not-allowed" : "cursor-pointer",
+                    compact ? "px-3 py-4 text-lg" : "",
+                ].join(" ")}
+                onMouseMove={(e) => {
+                    // красивый glow под курсором (десктоп)
+                    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                    (e.currentTarget as HTMLElement).style.setProperty(
+                        "--mx",
+                        `${e.clientX - r.left}px`
+                    );
+                    (e.currentTarget as HTMLElement).style.setProperty(
+                        "--my",
+                        `${e.clientY - r.top}px`
+                    );
+                }}
+            >
+                <span className="status-mark" />
+                {price}
+            </button>
+        );
+    };
+
+    return (
+        <>
+            {/* ====== Desktop (>= md) ====== */}
+            <div className="hidden md:block w-full">
+                <div className="mx-auto max-w-6xl flex flex-col gap-3">
+                    {topics.map((topic, i) => (
+                        <div
+                            key={i}
+                            className="grid grid-cols-[repeat(6,minmax(110px,1fr))] gap-3"
+                        >
+                            <div className="title-cell">{topic.title}</div>
+                            {PRICES.map((priceVal) => (
+                                <PriceButton key={priceVal} topic={topic} price={priceVal} />
+                            ))}
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* ====== Mobile (< md) grids 3×2 ====== */}
+            <div className="md:hidden w-full">
+                <div className="mx-auto max-w-md flex flex-col gap-4">
+                    {topics.map((topic, i) => (
+                        <div
+                            key={i}
+                            className="bg-white/5 border border-white/10 backdrop-blur-md rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,.45)] p-4"
+                        >
+                            <div className="text-slate-100 font-semibold mb-3">{topic.title}</div>
+                            <div className="grid grid-cols-3 gap-3">
+                                {PRICES.map((priceVal) => (
+                                    <PriceButton
+                                        key={priceVal}
+                                        topic={topic}
+                                        price={priceVal}
+                                        compact
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </>
+    );
+}

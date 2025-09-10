@@ -23,7 +23,6 @@ const Game = () => {
     const topics = useAppSelector(state => state.topics.topics);
 
     useEffect(() => {
-        // Загружаем топики; если пусто — сначала сеедим, потом перезагружаем
         dispatch(fetchTopics()).then((action: any) => {
             if (Array.isArray(action.payload) && action.payload.length === 0) {
                 dispatch(seedTopics()).then(() => dispatch(fetchTopics())).then((a: any) => {

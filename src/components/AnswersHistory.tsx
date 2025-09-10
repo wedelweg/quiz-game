@@ -1,7 +1,7 @@
 import {useEffect} from "react";
 import {useAppDispatch, useAppSelector} from "../app/hooks.ts";
 import {fetchAnswersHistory} from "../features/answers/answersSlice.ts";
-import {NavLink} from "react-router";
+import {NavLink} from "react-router-dom";
 
 const AnswersHistory = () => {
     const dispatch = useAppDispatch();

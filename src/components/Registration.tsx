@@ -1,22 +1,19 @@
-import {useRef} from "react";
-import {useNavigate} from "react-router-dom";
-import {useAppDispatch} from "../app/hooks.ts";
-import {fetchUserSaveInDB} from "../features/userData/userDataSlice.ts";
-import {NavLink} from "react-router";
+import { useRef } from "react";
+import { useNavigate, NavLink } from "react-router-dom";
+import { useAppDispatch } from "../app/hooks.ts";
+import { fetchUserSaveInDB } from "../features/userData/userDataSlice.ts";
 
-const Login = () => {
-
+const Registration = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const userNameRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
 
     function handleSubmit() {
-        const login = userNameRef.current!.value;
+        const login = userNameRef.current!.value.trim();
         const password = passwordRef.current!.value;
-
         if (login && password) {
-            dispatch(fetchUserSaveInDB({login, password}));
+            dispatch(fetchUserSaveInDB({ login, password }));
             navigate("/game");
         } else {
             alert("Please fill in all fields");
@@ -24,22 +21,27 @@ const Login = () => {
     }
 
     return (
-        <div className="min-h-screen p-4 flex flex-col justify-center text-center gap-7">
-            <label className={'font-bold ms-1'}>Login
-                <input id={"login-input"}
-                       className={"p-4 border-custom ml-13 w-45 text-center transition-transform duration-300 active:scale-95"}
-                       type={"text"} ref={userNameRef}></input>
-            </label>
-            <label className={'font-bold'}>Password
-                <input id={"password-input"}
-                       className={"p-4 border-custom ml-6 w-45 text-center transition-transform duration-300 active:scale-95"}
-                       type={"password"} ref={passwordRef}></input>
-            </label>
-            <button className="btn-yellow" onClick={handleSubmit}>Register</button>
-            <button className="btn-yellow"><NavLink to={'/'}>Go to Login</NavLink></button>
+        <div className="game-shell flex flex-col items-center justify-center gap-6">
+            <div className="glass p-8 w-full max-w-md">
+                <h2 className="font-display text-2xl mb-6 title-gradient text-center">Registration</h2>
 
+                <label className="block mb-4">
+                    <span className="block mb-2 font-semibold">Login</span>
+                    <input className="input-glass" type="text" ref={userNameRef} placeholder="Your nickname"/>
+                </label>
+
+                <label className="block mb-6">
+                    <span className="block mb-2 font-semibold">Password</span>
+                    <input className="input-glass" type="password" ref={passwordRef} placeholder="••••••••"/>
+                </label>
+
+                <div className="flex flex-col gap-3">
+                    <button className="btn-yellow" onClick={handleSubmit}>Register</button>
+                    <NavLink to="/login" className="btn-ghost text-center">Go to Login</NavLink>
+                </div>
+            </div>
         </div>
     );
 };
 
-export default Login;
+export default Registration;

@@ -8,7 +8,6 @@ const UserData = () => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
 
-    // rootDispatch ->
     const logout = () => {
         localStorage.removeItem("userId");
         dispatch(logOutAction());
