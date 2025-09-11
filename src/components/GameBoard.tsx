@@ -66,7 +66,6 @@ export default function GameBoard({ topics, onQuestionClick }: Props) {
                     compact ? "px-3 py-4 text-lg" : "",
                 ].join(" ")}
                 onMouseMove={(e) => {
-                    // красивый glow под курсором (десктоп)
                     const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
                     (e.currentTarget as HTMLElement).style.setProperty(
                         "--mx",
@@ -109,9 +108,11 @@ export default function GameBoard({ topics, onQuestionClick }: Props) {
                     {topics.map((topic, i) => (
                         <div
                             key={i}
-                            className="bg-white/5 border border-white/10 backdrop-blur-md rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,.45)] p-4"
+                            className="bg-white/5 border border-white/10 backdrop-blur-md rounded-2xl shadow p-4"
                         >
-                            <div className="text-slate-100 font-semibold mb-3">{topic.title}</div>
+                            <div className="text-slate-100 font-semibold mb-3">
+                                {topic.title}
+                            </div>
                             <div className="grid grid-cols-3 gap-3">
                                 {PRICES.map((priceVal) => (
                                     <PriceButton

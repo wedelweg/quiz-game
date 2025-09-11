@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import GameBoard from "./GameBoard.tsx";
 import QuestionModal from "./QuestionModal.tsx";
-import PageHeader from "./PageHeader.tsx";
+// import PageHeader from "./PageHeader.tsx";
 import {useEffect} from "react";
 import {useAppDispatch, useAppSelector} from "../app/hooks.ts";
 import {fetchTopics, seedTopics, initializeBoard} from "../features/topics/topicsSlice.ts";
@@ -38,7 +38,7 @@ const Game = () => {
 
     return (
         <div className="w-full">
-            <PageHeader/>
+
             <div className="game">
                 {!selected && (
                     <GameBoard topics={topics} onQuestionClick={setSelected}/>

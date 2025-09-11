@@ -9,9 +9,9 @@ const Registration = () => {
     const userNameRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
 
-    async function handleSubmit() {
+    const handleSubmit = async () => {
         const login = userNameRef.current!.value.trim();
-        const password = passwordRef.current!.value;
+        const password = passwordRef.current!.value.trim();
 
         if (!login || !password) {
             alert("Please fill in all fields");
@@ -19,16 +19,16 @@ const Registration = () => {
         }
 
         try {
-            // ждём пока сохранится пользователь
+            // ⏳ ждём пока юзер сохранится в Firestore
             await dispatch(fetchUserSaveInDB({ login, password })).unwrap();
 
-            // теперь точно есть userId в Redux и в localStorage
+            // ✅ редирект в игру
             navigate("/game");
-        } catch (err) {
-            console.error("Registration failed:", err);
-            alert("Something went wrong, try again.");
+        } catch (error) {
+            console.error("Registration failed:", error);
+            alert("Registration failed: " + error);
         }
-    }
+    };
 
     return (
         <div className="game-shell flex flex-col items-center justify-center gap-6">

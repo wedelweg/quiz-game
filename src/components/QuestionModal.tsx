@@ -3,6 +3,8 @@ import { useAppDispatch, useAppSelector } from "../app/hooks.ts";
 import { fetchScoreUpdateDB } from "../features/scoreData/scoreSlice.ts";
 import { markAnswered } from "../features/topics/topicsSlice.ts";
 import { addAnswerToHistory } from "../features/answers/answersSlice.ts";
+import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
 
 interface Props {
     title: string;
@@ -34,7 +36,21 @@ const QuestionModal = ({ title, price, question, answer, onClose }: Props) => {
 
     function changeScore(delta: number) {
         if (!id) {
-            alert("Сохранение очков доступно только для авторизованных пользователей");
+            // 🚫 Гостевой режим → показываем красивое модальное окно
+            Swal.fire({
+                icon: "info",
+                title: "Гостевой режим",
+                html: `
+                    <p class="mb-3">Сохранение очков доступно только для авторизованных пользователей.</p>
+                    <a href="${import.meta.env.BASE_URL}" 
+                       class="px-4 py-2 inline-block rounded-lg bg-yellow-400 text-black font-bold hover:bg-yellow-500 transition">
+                        Залогиниться
+                    </a>
+                `,
+                showConfirmButton: false,
+                background: "#1a1a4f",
+                color: "#fff",
+            });
             return;
         }
         dispatch(fetchScoreUpdateDB({ price: delta, oldScore, id }));

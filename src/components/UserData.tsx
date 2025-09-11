@@ -1,37 +1,53 @@
-import {useNavigate} from "react-router-dom";
-import {useAppDispatch, useAppSelector} from "../app/hooks.ts";
-import {logOutAction} from "../app/store.ts";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { changeId, changeLogin } from "../features/userData/userDataSlice";
+import { changeScore } from "../features/scoreData/scoreSlice";
 
 const UserData = () => {
-    const userName = useAppSelector(state => state.userLayer.user.login);
-    const isGuest = !userName || userName === "Guest"; // or id ?
-    const navigate = useNavigate();
     const dispatch = useAppDispatch();
+    const userId = useAppSelector((s) => s.userLayer.id);
+    const userLogin = useAppSelector((s) => s.userLayer.login || "Guest");
 
-    const logout = () => {
+    const loginUrl = import.meta.env.BASE_URL; // например /quiz-game/
+    const isLoginPage = window.location.pathname === loginUrl;
+
+    // 👤 проверяем сразу и Redux, и localStorage
+    const isGuest =
+        (!userId && userLogin === "Guest") ||
+        (!userId && localStorage.getItem("guest") === "true");
+
+    const handleLogout = () => {
         localStorage.removeItem("userId");
-        dispatch(logOutAction());
-        navigate("/login");
-    };
-
-    const goToLogin = () => {
-        navigate("/login");
+        localStorage.setItem("guest", "true"); // при выходе снова считаем гостем
+        dispatch(changeId(""));
+        dispatch(changeLogin("Guest"));
+        dispatch(changeScore(0));
+        window.location.href = loginUrl;
     };
 
     return (
-        <div className="flex items-center gap-4 text-yellow-400 text-right">
-            <div>
-                <div className="text-sm">Nickname:</div>
-                <div className="text-lg font-bold">{userName || "Guest"}</div>
+        <div className="flex flex-col items-center gap-2">
+            <div className="text-yellow-400 font-semibold text-center">
+                Nickname:
+                <div className="text-white font-normal mt-1">{userLogin}</div>
             </div>
-            {isGuest ? (
-                <button onClick={goToLogin} className="btn-yellow py-1 px-3">
-                    Go to Login Page
-                </button>
-            ) : (
-                <button onClick={logout} className="btn-yellow py-1 px-3">
+
+            {userId ? (
+                <button
+                    className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white transition"
+                    onClick={handleLogout}
+                >
                     Logout
                 </button>
+            ) : (
+                isGuest &&
+                !isLoginPage && (
+                    <button
+                        className="px-4 py-2 rounded-lg bg-yellow-400 hover:bg-yellow-500 text-black font-bold transition"
+                        onClick={() => (window.location.href = loginUrl)}
+                    >
+                        Go to Login Page
+                    </button>
+                )
             )}
         </div>
     );

@@ -113,3 +113,9 @@ body{
 .board-cell:hover { --mx: 50%; --my: 0%; }
 
 
+@layer components {
+    .nav-link {
+        @apply px-3 py-1 rounded-lg bg-white/10 border border-white/20
+        text-white/90 hover:bg-white/20 transition;
+    }
+}

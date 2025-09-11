@@ -1,59 +1,69 @@
-import {createAsyncThunk, createSlice, type PayloadAction} from "@reduxjs/toolkit";
-import type {ScoreStateInterface} from "../../utils/types.ts";
-import {doc, runTransaction} from "firebase/firestore";
-import {db} from "../../data/firestore.ts";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "../../data/firestore";
 
-const initialState: ScoreStateInterface = {
+interface ScoreState {
     scores: {
-        score: 0
-    }
+        score: number;
+    };
+    loading: boolean;
+    error: string | null;
 }
 
-interface ScoreWithId {
-    price: number,
-    oldScore: number,
-    id: string
-}
+const initialState: ScoreState = {
+    scores: {
+        score: 0,
+    },
+    loading: false,
+    error: null,
+};
 
-export const fetchScoreUpdateDB = createAsyncThunk(
-    "user/fetchScoreUpdateDB",
-    async ({price, id}: ScoreWithId) => {
-        const userRef = doc(db, 'users', id);
-        const newScore = await runTransaction(db, async (transaction) => {
-            const snapshot = await transaction.get(userRef);
-            if (!snapshot.exists()) {
-                throw new Error('User not found');
-            }
-            const current = (snapshot.data()?.score ?? 0) as number;
-            const updated = current + price;
-            transaction.update(userRef, { score: updated });
-            return updated;
+// ✅ обновление очков пользователя в Firestore
+export const fetchScoreUpdateDB = createAsyncThunk<
+    number,
+    { price: number; oldScore: number; id: string }
+>("score/update", async ({ price, oldScore, id }, thunkAPI) => {
+    try {
+        const newScore = oldScore + price;
+        const ref = doc(db, "users", id);
+
+        await updateDoc(ref, {
+            score: newScore,
         });
-        return newScore;
-    }
-);
 
+        return newScore;
+    } catch (e: any) {
+        return thunkAPI.rejectWithValue(e.message);
+    }
+});
 
 const scoreSlice = createSlice({
-    name: 'score',
+    name: "score",
     initialState,
     reducers: {
-        changeScore: (state: ScoreStateInterface, action: PayloadAction<number>) => {
-            state.scores.score = action.payload
-        }
+        changeScore: (state, action) => {
+            state.scores.score = action.payload;
+        },
+        resetScore: (state) => {
+            state.scores.score = 0;
+        },
     },
     extraReducers: (builder) => {
         builder
             .addCase(fetchScoreUpdateDB.pending, (state) => {
-                state.scores = {score: NaN};
+                state.loading = true;
+                state.error = null;
             })
-            .addCase(fetchScoreUpdateDB.fulfilled, (state, {payload}) => {
-                state.scores = {score: payload};
+            .addCase(fetchScoreUpdateDB.fulfilled, (state, action) => {
+                state.loading = false;
+                state.scores.score = action.payload;
             })
-            .addCase(fetchScoreUpdateDB.rejected, () => {
-                console.log("Error!")
-            })
-    }
-})
-export const {changeScore} = scoreSlice.actions;
+            .addCase(fetchScoreUpdateDB.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            });
+    },
+});
+
+export const { changeScore, resetScore } = scoreSlice.actions;
 export default scoreSlice.reducer;

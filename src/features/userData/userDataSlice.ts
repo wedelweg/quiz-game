@@ -1,102 +1,132 @@
-import {createAsyncThunk, createSlice, type PayloadAction} from "@reduxjs/toolkit";
-import type {UserInfo, UserStateInterface} from "../../utils/types.ts";
-import {addDoc, collection, getDocs, query, where} from "firebase/firestore";
-import {db} from "../../data/firestore.ts";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "../../data/firestore";
 
-const initialState: UserStateInterface = {
-    id: '',
-    user: {
-        login: '',
-        password: '',
-    }
+export interface UserData {
+    id: string;
+    login: string;
+    password: string;
+    score: number;
 }
 
-export const fetchUserSaveInDB = createAsyncThunk(
-    "user/fetchUserSaveInDB",
-    async ({login, password}: UserInfo) => {
-        const response = await addDoc(collection(db, "users"), {
+interface UserDataState {
+    id: string | null;
+    login: string | null;
+    score: number;
+    loading: boolean;
+    error: string | null;
+    isGuest: boolean; // 👈 добавили
+}
+
+const initialState: UserDataState = {
+    id: null,
+    login: null,
+    score: 0,
+    loading: false,
+    error: null,
+    isGuest: false,
+};
+
+// регистрация
+export const fetchUserSaveInDB = createAsyncThunk<
+    UserData,
+    { login: string; password: string }
+>("userData/save", async ({ login, password }, thunkAPI) => {
+    try {
+        const docRef = await addDoc(collection(db, "users"), {
             login,
             password,
             score: 0,
-            createdAt: Date.now(),
         });
-        if (!response) {
-            throw new Error("Error adding user to Firestore");
-        }
-        return {
-            id: response.id,
-            login,
-        };
+        return { id: docRef.id, login, password, score: 0 };
+    } catch (e: any) {
+        return thunkAPI.rejectWithValue(e.message);
     }
-);
+});
 
-export const fetchUserCheckExistInDB = createAsyncThunk(
-    "user/fetchUserCheckExistInDB",
-    async ({login, password}: UserInfo) => {
-        const userRef = collection(db, 'users');
-        const buildQuery = query(
-            userRef,
-            where('login', '==', login),
-            where('password', '==', password)
+// логин
+export const fetchUserCheckExistInDB = createAsyncThunk<
+    UserData,
+    { login: string; password: string }
+>("userData/checkExist", async ({ login, password }, thunkAPI) => {
+    try {
+        const q = query(
+            collection(db, "users"),
+            where("login", "==", login),
+            where("password", "==", password)
         );
-        const querySnapshot = await getDocs(buildQuery);
-        if (querySnapshot.empty) {
-            throw new Error("User not found");
-        }
-        const userDoc = querySnapshot.docs[0];
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) throw new Error("User not found or wrong password");
+
+        const userDoc = snapshot.docs[0];
+        const data = userDoc.data() as Omit<UserData, "id">;
+
         return {
             id: userDoc.id,
-            login: userDoc.data().login,
-            score: userDoc.data().score // added
-        }
+            login: data.login,
+            password: data.password,
+            score: data.score,
+        };
+    } catch (e: any) {
+        return thunkAPI.rejectWithValue(e.message);
     }
-);
+});
 
 const userDataSlice = createSlice({
-    name: 'user',
+    name: "userData",
     initialState,
     reducers: {
-        changeLogin(state, action: PayloadAction<string>) {
-            state.user.login = action.payload;
-        },
-        changeId(state, action: PayloadAction<string>) {
+        changeId: (state, action) => {
             state.id = action.payload;
-        }
+        },
+        changeLogin: (state, action) => {
+            state.login = action.payload;
+        },
+        changeScore: (state, action) => {
+            state.score = action.payload;
+        },
+        setGuest: (state) => {
+            state.id = null;
+            state.login = "Guest";
+            state.score = 0;
+            state.isGuest = true; // 👈 сразу ставим
+            localStorage.setItem("guest", "true");
+            localStorage.removeItem("userId");
+        },
+        logout: (state) => {
+            state.id = null;
+            state.login = "Guest";
+            state.score = 0;
+            state.error = null;
+            state.isGuest = true;
+            localStorage.setItem("guest", "true");
+            localStorage.removeItem("userId");
+        },
     },
     extraReducers: (builder) => {
         builder
-            .addCase(fetchUserSaveInDB.pending, (state) => {
-                state.id = "Pending....";
-                console.log("Pending...")
-            })
             .addCase(fetchUserSaveInDB.fulfilled, (state, action) => {
                 state.id = action.payload.id;
-                state.user.login = action.payload.login;
-                localStorage.setItem("userId", action.payload.id)
-                console.log("Fulfilled...")
-            })
-            .addCase(fetchUserSaveInDB.rejected, (state, action) => {
-                state.id = action.payload + "" || "Error!!!";
-                console.log(action.payload);
-                console.log("Rejected...")
-            })
-            .addCase(fetchUserCheckExistInDB.pending, (state) => {
-                state.id = "Pending....";
-                console.log("Check Pending...")
+                state.login = action.payload.login;
+                state.score = 0;
+                state.isGuest = false;
+                localStorage.setItem("userId", action.payload.id);
+                localStorage.removeItem("guest");
             })
             .addCase(fetchUserCheckExistInDB.fulfilled, (state, action) => {
-                state.id = action.payload.id;
-                state.user.login = action.payload.login;
-                localStorage.setItem("userId", action.payload.id)
-                // dispatch(changeScore(action.payload.score));
-                // dispatch(fetchScoreFromDB(action.payload.id)); //if not here, then in login.
-                console.log("Check Fulfilled...")
-            })
-            .addCase(fetchUserCheckExistInDB.rejected, () => {
-                console.log('Authentication failed. User remains unauthorized.'); //fixed
-            })
-    }
-})
+                if (action.payload) {
+                    state.id = action.payload.id;
+                    state.login = action.payload.login;
+                    state.score = action.payload.score;
+                    state.isGuest = false;
+                    localStorage.setItem("userId", action.payload.id);
+                    localStorage.removeItem("guest");
+                }
+            });
+    },
+});
 
-export const {changeLogin, changeId} = userDataSlice.actions;
+export const { changeId, changeLogin, changeScore, logout, setGuest } =
+    userDataSlice.actions;
 export default userDataSlice.reducer;

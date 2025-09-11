@@ -1,38 +1,70 @@
 import { useRef } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
 import { useAppDispatch } from "../app/hooks.ts";
-import { fetchUserCheckExistInDB } from "../features/userData/userDataSlice.ts";
-import { changeScore } from "../features/scoreData/scoreSlice.ts";
+import { fetchUserCheckExistInDB, changeScore, setGuest } from "../features/userData/userDataSlice.ts";
+import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
 
 const Login = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const userNameRef = useRef<HTMLInputElement>(null);
+    const loginRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
 
-    function handleSubmitSignIn() {
-        const login = userNameRef.current!.value.trim();
-        const password = passwordRef.current!.value;
-        if (login && password) {
-            dispatch(fetchUserCheckExistInDB({ login, password }))
-                .unwrap()
-                .then((payload) => {
-                    if (typeof payload?.score === "number") {
-                        dispatch(changeScore(payload.score));
-                    }
-                    navigate("/game");
-                })
-                .catch(() => {
-                    alert("Неверный логин или пароль");
-                });
-        } else {
-            alert("Please fill in all fields");
-        }
-    }
+    const handleSubmitSignIn = async () => {
+        const login = loginRef.current!.value.trim();
+        const password = passwordRef.current!.value.trim();
 
-    function handleSubmitGuest() {
-        navigate("/game");
-    }
+        if (!login || !password) {
+            Swal.fire({
+                icon: "warning",
+                title: "Заполните все поля!",
+                confirmButtonText: "Ок",
+                background: "#1a1a4f",
+                color: "#fff",
+                confirmButtonColor: "#facc15",
+            });
+            return;
+        }
+
+        try {
+            const payload = await dispatch(fetchUserCheckExistInDB({ login, password })).unwrap();
+
+            if (typeof payload?.score === "number") {
+                dispatch(changeScore(payload.score));
+
+                Swal.fire({
+                    icon: "success",
+                    title: "Добро пожаловать!",
+                    text: `Приятной игры, ${login}!`,
+                    confirmButtonText: "Играть",
+                    background: "#1a1a4f",
+                    color: "#fff",
+                    confirmButtonColor: "#22c55e",
+                }).then(() => {
+                    navigate("/game");
+                });
+            }
+        } catch {
+            Swal.fire({
+                icon: "error",
+                title: "Ошибка входа",
+                text: "Неверный логин или пароль",
+                confirmButtonText: "Попробовать снова",
+                background: "#1a1a4f",
+                color: "#fff",
+                confirmButtonColor: "#ef4444",
+            });
+        }
+    };
+
+    const handleSubmitGuest = (e: React.FormEvent) => {
+        e.preventDefault();
+        dispatch(setGuest());  // 👈 теперь Redux сразу знает, что это гость
+        setTimeout(() => {
+            navigate("/game");
+        }, 0);
+    };
 
     return (
         <div className="game-shell flex flex-col items-center gap-6">
@@ -47,7 +79,7 @@ const Login = () => {
                         id="login-input"
                         className="input-glass"
                         type="text"
-                        ref={userNameRef}
+                        ref={loginRef}
                         placeholder="Your nickname"
                     />
                 </label>

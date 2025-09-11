@@ -1,46 +1,88 @@
-import {useEffect} from "react";
-import {useAppDispatch, useAppSelector} from "../app/hooks.ts";
-import {fetchAnswersHistory} from "../features/answers/answersSlice.ts";
-import {NavLink} from "react-router-dom";
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { fetchAnswersHistory } from "../features/answers/answersSlice";
 
 const AnswersHistory = () => {
     const dispatch = useAppDispatch();
-    const userId = useAppSelector(s => s.userLayer.id);
-    const {items, loading} = useAppSelector(s => s.answers);
+    const userId = useAppSelector((s) => s.userLayer.id);
+    const { items, loading, error } = useAppSelector((s) => s.answers);
 
     useEffect(() => {
         if (userId) {
-            dispatch(fetchAnswersHistory({userId}));
+            dispatch(fetchAnswersHistory({ userId }));
         }
     }, [dispatch, userId]);
 
     if (!userId) {
-        return <div className="text-center">Требуется вход для просмотра истории.</div>;
+        return (
+            <div className="p-6 text-center text-red-400">
+                Please log in to see your answers history.
+            </div>
+        );
+    }
+
+    if (loading) {
+        return <div className="p-6 text-center">Loading...</div>;
+    }
+
+    if (error) {
+        return (
+            <div className="p-6 text-center text-red-400">
+                Error loading history: {error}
+            </div>
+        );
+    }
+
+    if (!items.length) {
+        return (
+            <div className="p-6 text-center text-gray-400">
+                No answers yet.
+            </div>
+        );
     }
 
     return (
-        <div className="w-full max-w-3xl mx-auto p-4 border-custom rounded-lg">
-            <h2 className="text-2xl font-bold mb-4 text-yellow-400">История ответов</h2>
-            <div className="mb-4">
-                <NavLink to={'/game'} className="btn-yellow py-1 px-3">Вернуться к игре</NavLink>
-            </div>
-            {loading && <div>Загрузка...</div>}
-            {!loading && items.length === 0 && <div>Пока нет ответов.</div>}
-            <div className="flex flex-col gap-2">
-                {items.map((a) => (
-                    <div key={a.id} className={`p-3 rounded border-custom ${a.result === 'correct' ? 'bg-green-800/40' : 'bg-red-800/40'}`}>
-                        <div className="flex justify-between">
-                            <div className="font-semibold">{a.title} — {a.price}</div>
-                            <div className="opacity-80 text-sm">{new Date(a.answeredAt).toLocaleString()}</div>
-                        </div>
-                        <div className="mt-1 text-sm opacity-90">{a.question}</div>
-                    </div>
-                ))}
+        <div className="w-full max-w-4xl bg-[#0c0f2f]/60 backdrop-blur-md rounded-xl p-6 shadow-md">
+            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                📜 Answers History
+            </h2>
+            <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                    <thead>
+                    <tr className="bg-[#1a1a4f]">
+                        <th className="px-4 py-2">#</th>
+                        <th className="px-4 py-2">Topic</th>
+                        <th className="px-4 py-2">Question</th>
+                        <th className="px-4 py-2">Result</th>
+                        <th className="px-4 py-2">Score</th>
+                        <th className="px-4 py-2">Date</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {items.map((ans, idx) => (
+                        <tr
+                            key={idx}
+                            className={`border-b border-white/10 ${
+                                ans.result === "correct"
+                                    ? "text-green-400"
+                                    : "text-red-400"
+                            }`}
+                        >
+                            <td className="px-4 py-2">{idx + 1}</td>
+                            <td className="px-4 py-2">{ans.title}</td>
+                            <td className="px-4 py-2">{ans.question}</td>
+                            <td className="px-4 py-2 capitalize">{ans.result}</td>
+                            <td className="px-4 py-2">{ans.price}</td>
+                            <td className="px-4 py-2">
+                                {new Date(ans.answeredAt).toLocaleString()}
+                            </td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
             </div>
         </div>
     );
 };
 
 export default AnswersHistory;
-
-
